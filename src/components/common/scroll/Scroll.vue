@@ -36,21 +36,35 @@ export default {
     })
 
     // 2.监听滚动的位置
-    this.scroll.on('scroll', (position) => {
-      this.$emit('scroll', position)
-    })
+    if (this.probeType === 2 || this.probeType === 3) {
+      this.scroll.on('scroll', (position) => {
+        this.$emit('scroll', position)
+      })
+    }
 
     // 3.监听上拉事件
-    this.scroll.on('pullingUp', () => {
-      this.$emit('pullingUp')
-    })
+    if (this.pullUpLoad) {
+      this.scroll.on('pullingUp', () => {
+        this.$emit('pullingUp')
+      })
+    }
   },
   methods: {
+    // 1.backTop操作
     scrollTo(x, y, time = 300) {
-      this.scroll.scrollTo(x, y, time)
+      this.scroll && this.scroll.scrollTo(x, y, time)
     },
+    // 2.上拉操作
     finishPullUp() {
-      this.scroll.finishPullUp()
+      this.scroll && this.scroll.finishPullUp()
+    },
+    // 3.刷新操作
+    refresh() {
+      this.scroll && this.scroll.refresh()
+      // console.log('----');
+    },
+    getScrollY() {
+      return this.scroll ? this.scroll.y : 0
     }
   }
 }
