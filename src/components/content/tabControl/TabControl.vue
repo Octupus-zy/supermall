@@ -17,6 +17,7 @@ export default {
       currentIndex: 0
     }
   },
+  //父向子传递信息,在子组件中接受,在父组件中通过绑定:titles进行发送,子组件通过props接受
   props: {
     titles: {
       type: Array,

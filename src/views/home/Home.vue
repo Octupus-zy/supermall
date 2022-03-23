@@ -1,20 +1,30 @@
 <template>
-  <div id="home">
-    <!--头部标签栏-->
+  <div id="home" class="wrapper">
+    <!--头部标题-->
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <!--轮播图-->
-    <home-swiper :banners="banners"></home-swiper>
-    <!--圆形区域-->
-    <recommend-view :recommends="recommends"></recommend-view>
-    <!--图片-->
-    <feature-view></feature-view>
-    <!--分类选项-->
-    <tab-control class="tab-control" :titles="['流行','新款','精选']" @tabClick="tabClick"></tab-control>
-    <!--商品列表-->
-    <goods-list :goods="showGoods"></goods-list>
-
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll"
+            :pull-up-load="true"
+            @pullingUp="loadMore">
+      <!--轮播图-->
+      <home-swiper :banners="banners"/>
+      <!--圆形区域-->
+      <recommend-view :recommends="recommends"/>
+      <!--图片-->
+      <feature-view/>
+      <!--分类选项-->
+      <tab-control class="tab-control"
+                   :titles="['流行','新款','精选']"
+                   @tabClick="tabClick"/>
+      <!--商品列表-->
+      <goods-list :goods="showGoods"/>
+    </scroll>
+    <!--在我们需要监听一个组件的原生事件时,必须给对应的事件加上.native修饰符,才能进行监听-->
+    <back-top @click.native="backClick" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -29,9 +39,9 @@ import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
 import GoodsListItem from "components/content/goods/GoodsListItem";
 import Scroll from "components/common/scroll/Scroll";
+import BackTop from "components/content/backTop/BackTop";
 
 import {getHomeGoods, getHomeMultidata} from "@/network/home";
-
 
 export default {
   name: "home",
@@ -43,7 +53,8 @@ export default {
     TabControl,
     GoodsList,
     GoodsListItem,
-    Scroll
+    Scroll,
+    BackTop
   },
   data() {
     return {
@@ -54,7 +65,8 @@ export default {
         'new': {page: 0, list: []},
         'sell': {page: 0, list: []},
       },
-      currentType: 'pop'
+      currentType: 'pop',
+      isShowBackTop: false
     }
   },
   computed: {
@@ -65,11 +77,9 @@ export default {
   created() {
     // 1.请求多个数据
     this.getHomeMultidata()
-
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
-
   },
   methods: {
     /*
@@ -89,25 +99,35 @@ export default {
           break
       }
     },
-
+    backClick() {
+      //(0,0,500):x,y:(0,0),500ms
+      // this.$refs.scroll.scrollTo(0, 0,500)
+      this.$refs.scroll.scrollTo(0, 0)
+    },
+    contentScroll(position) {
+      this.isShowBackTop = (-position.y) > 1000
+    },
+    loadMore() {
+      this.getHomeGoods(this.currentType)
+    },
     /*
     * 网络请求相关方法
     */
     getHomeMultidata() {
       getHomeMultidata().then(res => {
         this.banners = res.data.banner.list;
-        console.log(res);
         this.recommends = res.data.recommend.list;
       })
     },
     getHomeGoods(type) {
       const page = this.goods[type].page + 1
       getHomeGoods(type, page).then(res => {
-          console.log(res);
-          this.goods[type].list.push(...res.data.list)
-          this.goods[type].page + 1
-        }
-      )
+        this.goods[type].list.push(...res.data.list)
+        this.goods[type].page += 1
+
+        // 完成上拉加载更多
+        this.$refs.scroll.finishPullUp()
+      })
     }
   }
 }
@@ -116,18 +136,24 @@ export default {
 <style scoped>
 
 #home {
-  padding-top: 44px;
+  /*方案二*/
+  position: relative;
+  height: 100vh;
+  /*方案一*/
+  /*viewport height*/
+  /*padding-top: 44px;*/
+
 }
 
 .home-nav {
   background-color: var(--color-tint);
   color: #fff;
 
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 9;
+  /*position: fixed;*/
+  /*left: 0;*/
+  /*right: 0;*/
+  /*top: 0;*/
+  /*z-index: 9;*/
 }
 
 .tab-control {
@@ -135,6 +161,24 @@ export default {
   position: sticky;
   top: 44px;
   z-index: 9;
+}
+
+/*方案一*/
+/*.content {*/
+/*  height: calc(100% - 93px);*/
+/*  overflow: hidden;*/
+/*  margin-top: 44px;*/
+/*}*/
+
+/*方案二*/
+.content {
+  overflow: hidden;
+
+  position: absolute;
+  top: 44px;
+  bottom: 49px;
+  left: 0;
+  right: 0;
 }
 
 </style>

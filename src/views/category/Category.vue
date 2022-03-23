@@ -1,7 +1,10 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" ref="wrapper">
     <ul class="content">
+      <!--无论是否设置click:true,button都可以点击-->
       <button @click="btnClick">按钮</button>
+      <!--2.必须设置click:true,那么div才能监听点击-->
+      <div @click="divClick">hahahaha</div>
       <li>分类列表1</li>
       <li>分类列表2</li>
       <li>分类列表3</li>
@@ -122,7 +125,7 @@ export default {
 
   },
   mounted() {
-    this.scroll = new BScroll(document.querySelector('.wrapper'), {
+    this.scroll = new BScroll(this.$refs.wrapper, {
       probeType: 3,
       click: true, //当前版本不需要设置
       pullUpLoad: true
@@ -139,6 +142,9 @@ export default {
   methods: {
     btnClick() {
       console.log('btnClick');
+    },
+    divClick() {
+      console.log('div点击');
     }
   }
 }

@@ -9,13 +9,15 @@ export function request(config, success, faiture) {
   })
   instance.interceptors.request.use(config => {
     return config
+    // console.log('成功');
   }, err => {
-    // console.log(err);
+    // console.log('失败');
   })
   instance.interceptors.response.use(config => {
     return config.data
+    // console.log('成功');
   }, err => {
-    // console.log(err);
+    // console.log('失败');
   })
 
   return instance(config)
