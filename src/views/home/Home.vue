@@ -44,7 +44,8 @@ import Scroll from "@/components/common/scroll/Scroll";
 import BackTop from "@/components/content/backTop/BackTop";
 
 import {getHomeGoods, getHomeMultidata} from "@/network/home";
-import {debounce} from "@/common/utils";
+
+import {itemListenerMixin} from "@/common/mixin"
 
 export default {
   name: "home",
@@ -59,6 +60,8 @@ export default {
     Scroll,
     BackTop
   },
+  // 混入函数
+  mixins: [itemListenerMixin],
   data() {
     return {
       banners: [],
@@ -72,7 +75,7 @@ export default {
       isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
-      saveY: 0
+      saveY: 0,
     }
   },
   computed: {
@@ -80,18 +83,16 @@ export default {
       return this.goods[this.currentType].list
     },
   },
-  destroyed() {
-    // console.log('destroyed');
-  },
   activated() {
-    // console.log('activated');
     this.$refs.scroll.scrollTo(0, this.saveY, 0)
     // 刷新位置一次防止出现bug
-    this.$refs.scroll.refresh()
+    this.refresh()
   },
   deactivated() {
-    // console.log('deactivated');
+    // 1.保存Y值
     this.saveY = this.$refs.scroll.getScrollY()
+    // 2.取消全局事件监听
+    this.$bus.$off('itemImageLoad', this.itemImgListener)
   },
 
   created() {
@@ -101,8 +102,12 @@ export default {
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
+
+
   },
   mounted() {
+    // 该处方法使用混入
+    // 这个地方img标签确实被挂载,但其中的图片还没有占据高度
     // 1.1.监听item中图片加载完成(无防抖动)
     // this.$bus.$on('itemImageLoad', () => {
     //   // 将要刷新30次
@@ -110,10 +115,13 @@ export default {
     // })
 
     // 1.2.监听item中图片加载完成(添加防抖动)
-    const refresh = debounce(this.$refs.scroll.refresh, 100)
-    this.$bus.$on('itemImageLoad', () => {
-      refresh()
-    })
+    // const refresh = debounce(this.$refs.scroll.refresh, 100)
+    //
+    // // 对监听事件进行保存
+    // this.itemImgListener = () => {
+    //   refresh()
+    // }
+    // this.$bus.$on('itemImageLoad', this.itemImgListener)
 
     // 这里取吸顶tab的敢高度不准确,因为轮播图的图片还未加载出来
     // console.log(this.$refs.tabControl.$el.offsetTop);
@@ -134,7 +142,7 @@ export default {
       }
       // 让两个选中的['流行','新款','精选']保持一致
       this.$refs.tabControl1.currentIndex = index;
-      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
     backClick() {
       //(0,0,500):x,y:(0,0),500ms

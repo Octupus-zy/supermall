@@ -63,6 +63,7 @@ export default {
       this.scroll && this.scroll.refresh()
       // console.log('----');
     },
+    // 4.获取位置
     getScrollY() {
       return this.scroll ? this.scroll.y : 0
     }

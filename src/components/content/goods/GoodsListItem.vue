@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="" @load="imageLoad">
+  <div class="goods-item" @click="itemClick">
+    <img :src="showImage" alt="" @load="imageLoad">
     <div class="goods-info">
       <p>{{ goodsItem.title }}</p>
       <span class="price">{{ goodsItem.price }}</span>
@@ -20,9 +20,25 @@ export default {
       }
     }
   },
-  methods:{
-    imageLoad(){
+  computed: {
+    showImage() {
+      return this.goodsItem.image || this.goodsItem.show.img
+    }
+  },
+  methods: {
+    imageLoad() {
+      // 方案一,通过路由判断Home是否需要进行图片加载监听并刷新
+      // if(this.$route.path('/home')){
+      //   this.$bus.$emit('homeItemImageLoad')
+      // } else if(this.$route.path('/detail')){
+      //   this.$bus.$emit('detailItemImageLoad')
+      // }
+
+      // 方案二,在Home的deactivated的事件中进行取消监听
       this.$bus.$emit('itemImageLoad')
+    },
+    itemClick() {
+      this.$router.push('/detail/' + this.goodsItem.iid)
     }
   }
 }

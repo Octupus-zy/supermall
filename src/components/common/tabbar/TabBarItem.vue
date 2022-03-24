@@ -42,6 +42,7 @@ export default {
   },
   methods: {
     itemClick() {
+      // replace 没有返回操作
       this.$router.replace(this.path)
     }
   }
