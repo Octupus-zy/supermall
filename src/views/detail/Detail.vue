@@ -10,9 +10,9 @@
       <!--轮播图-->
       <detail-swiper :top-images="topImages"/>
       <!--基本信息-->
-      <detail-base-info :goods="goods"/>
+      <detail-base-info :goodsInfo="goodsInfo"/>
       <!--店铺信息-->
-      <detail-shop-info :shop="shop"/>
+      <detail-shop-info :shopInfo="shopInfo"/>
       <!--商品信息-->
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"/>
       <!--参数信息-->
@@ -22,8 +22,10 @@
       <!--推荐信息-->
       <goods-list :goods="recommends" @load="imageLoad" ref="recommend"/>
     </scroll>
+    <!--底部功能栏-->
+    <detail-bottom-bar @addToCart="addToCart"/>
     <!--返回-->
-    <back-top @click.native="backClick" v-show="isShowBackTop"/>
+    <back-top @click.native="backTop" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -35,16 +37,17 @@ import DetailShopInfo from '@/views/detail/childComps/DetailShopInfo'
 import DetailGoodsInfo from '@/views/detail/childComps/DetailGoodsInfo'
 import DetailParamInfo from '@/views/detail/childComps/DetailParamInfo'
 import DetailCommentInfo from "@/views/detail/childComps/DetailCommentInfo";
+import DetailBottomBar from "@/views/detail/childComps/DetailBottomBar";
 
 import GoodsList from "@/components/content/goods/GoodsList";
-import BackTop from "@/components/content/backTop/BackTop";
 import Scroll from '@/components/common/scroll/Scroll'
 
-import {getDetail, Goods, Shop, GoodsParam, getRecommend} from "@/network/detail";
+import {getDetail, getRecommend, Goods, GoodsParam, Shop} from "@/network/detail";
 
-import {itemListenerMixin} from "@/common/mixin";
+import {backTopMixin, itemListenerMixin} from "@/common/mixin";
+import {BACKTOP_DISTANCE} from "@/common/const";
+
 import {debounce} from "@/common/utils";
-
 
 export default {
   name: "Detail",
@@ -55,19 +58,19 @@ export default {
     DetailShopInfo,
     DetailGoodsInfo,
     DetailParamInfo,
-    Scroll,
     DetailCommentInfo,
+    DetailBottomBar,
+    Scroll,
     GoodsList,
-    BackTop
   },
-  // 混入函数
-  mixins: [itemListenerMixin],
+  // 图片加载监听混入函数/backTop事件混入
+  mixins: [itemListenerMixin, backTopMixin],
   data() {
     return {
       iid: null,
       topImages: [],
-      goods: {},
-      shop: {},
+      goodsInfo: {},
+      shopInfo: {},
       detailInfo: {},
       paramInfo: {},
       commentInfo: {},
@@ -75,7 +78,6 @@ export default {
       themeTopYs: [],
       getThemeTopY: null,
       currentIndex: 0,
-      isShowBackTop: false,
     }
   },
   created() {
@@ -90,9 +92,9 @@ export default {
       // 2.取出轮播图的数据
       this.topImages = data.itemInfo.topImages
       // 3.获取商品信息
-      this.goods = new Goods(data.itemInfo, data.columns, data.shopInfo.services)
+      this.goodsInfo = new Goods(data.itemInfo, data.columns, data.shopInfo.services)
       // 4.创建店铺信息的对象
-      this.shop = new Shop(data.shopInfo)
+      this.shopInfo = new Shop(data.shopInfo)
       // 5.保存商品的详情数据
       this.detailInfo = data.detailInfo;
       // 6.获取参数的信息
@@ -116,10 +118,11 @@ export default {
       // offset Top值不对的时候,都是因为图片的问题
       this.themeTopYs = []
       this.themeTopYs.push(0);
-      this.themeTopYs.push(this.$refs.params.$el.offsetTop)
-      this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
-      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
-      console.log(this.themeTopYs);
+      this.themeTopYs.push(this.$refs.params.$el.offsetTop - 44)
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44)
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44)
+      this.themeTopYs.push(Number.MAX_VALUE)
+      // console.log(this.themeTopYs);
     }, 100)
   },
   mounted() {
@@ -146,39 +149,61 @@ export default {
       const positionY = -position.y
 
       let length = this.themeTopYs.length
-      for (let i = 0; i < length; i++) {
-        if (this.currentIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i + 1]) || (i === length - 1 && positionY >= this.themeTopYs[i]))) {
+      // 1.1.普通做法
+      // for (let i = 0; i < length; i++) {
+      //   if (this.currentIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i + 1]) || (i === length - 1 && positionY >= this.themeTopYs[i]))) {
+      //     this.currentIndex = i;
+      //     this.$refs.nav.currentIndex = this.currentIndex
+      //     console.log(this.currentIndex);
+      //   }
+      // }
+
+      // 1.2.加入最大值
+      for (let i = 0; i < length - 1; i++) {
+        if (this.currentIndex !== i && (positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i + 1])) {
           this.currentIndex = i;
           this.$refs.nav.currentIndex = this.currentIndex
           console.log(this.currentIndex);
         }
       }
-      // 2.判断BackTop是否显示
-      this.isShowBackTop = (-position.y) > 1000
 
+      // 2.判断BackTop是否显示
+      this.isShowBackTop = (-position.y) > BACKTOP_DISTANCE
     },
     titleClick(index) {
       // console.log(index);
       this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 300)
     },
-    backClick() {
-      this.$refs.scroll.scrollTo(0, 0)
-    },
+    addToCart() {
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goodsInfo.title;
+      product.desc = this.goodsInfo.desc;
+      product.price = this.goodsInfo.realPrice;
+      product.iid = this.iid;
+
+      // this.$store.commit('addToCart',product)
+      this.$store.dispatch('addToCart', product)
+    }
   }
 }
 </script>
 
 <style scoped>
 /*隐藏tabbar*/
+/*relative会脱离文档流*/
 #detail {
-  position: relative;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 9;
   background-color: #fff;
   height: 100vh;
 }
 
 .content {
-  height: calc(100% - 44px);
+  height: calc(100% - 44px - 49px);
 }
 
 </style>

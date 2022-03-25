@@ -1,7 +1,9 @@
 <template>
   <div id="home" class="wrapper">
     <!--头部标题-->
-    <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
+    <nav-bar class="home-nav">
+      <div slot="center">购物街</div>
+    </nav-bar>
     <!--固定tabControl-->
     <tab-control :titles="['流行', '新款', '精选']"
                  @tabClick="tabClick"
@@ -26,7 +28,7 @@
       <goods-list :goods="showGoods"/>
     </scroll>
     <!--在我们需要监听一个组件的原生事件时,必须给对应的事件加上.native修饰符,才能进行监听-->
-    <back-top @click.native="backClick" v-show="isShowBackTop"/>
+    <back-top @click.native="backTop" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -41,14 +43,15 @@ import TabControl from "@/components/content/tabControl/TabControl";
 import GoodsList from "@/components/content/goods/GoodsList";
 import GoodsListItem from "@/components/content/goods/GoodsListItem";
 import Scroll from "@/components/common/scroll/Scroll";
-import BackTop from "@/components/content/backTop/BackTop";
 
 import {getHomeGoods, getHomeMultidata} from "@/network/home";
 
-import {itemListenerMixin} from "@/common/mixin"
+import {backTopMixin, itemListenerMixin} from "@/common/mixin"
+import {BACKTOP_DISTANCE} from "@/common/const";
 
 export default {
   name: "home",
+
   components: {
     NavBar,
     HomeSwiper,
@@ -58,10 +61,10 @@ export default {
     GoodsList,
     GoodsListItem,
     Scroll,
-    BackTop
   },
-  // 混入函数
-  mixins: [itemListenerMixin],
+  // 图片加载监听混入函数/backTop事件
+  mixins: [itemListenerMixin, backTopMixin],
+
   data() {
     return {
       banners: [],
@@ -72,22 +75,24 @@ export default {
         'sell': {page: 0, list: []},
       },
       currentType: 'pop',
-      isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
       saveY: 0,
     }
   },
+
   computed: {
     showGoods() {
       return this.goods[this.currentType].list
     },
   },
+
   activated() {
     this.$refs.scroll.scrollTo(0, this.saveY, 0)
     // 刷新位置一次防止出现bug
     this.refresh()
   },
+
   deactivated() {
     // 1.保存Y值
     this.saveY = this.$refs.scroll.getScrollY()
@@ -102,9 +107,8 @@ export default {
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
-
-
   },
+
   mounted() {
     // 该处方法使用混入
     // 这个地方img标签确实被挂载,但其中的图片还没有占据高度
@@ -126,6 +130,7 @@ export default {
     // 这里取吸顶tab的敢高度不准确,因为轮播图的图片还未加载出来
     // console.log(this.$refs.tabControl.$el.offsetTop);
   },
+
   methods: {
     //事件监听相关的方法
     tabClick(index) {
@@ -144,14 +149,10 @@ export default {
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
     },
-    backClick() {
-      //(0,0,500):x,y:(0,0),500ms
-      // this.$refs.scroll.scrollTo(0, 0,500)
-      this.$refs.scroll.scrollTo(0, 0)
-    },
+
     contentScroll(position) {
       // 1.判断BackTop是否显示
-      this.isShowBackTop = (-position.y) > 1000
+      this.isShowBackTop = (-position.y) > BACKTOP_DISTANCE
 
       // 2.决定tabControl是否吸顶(position: fixed)
       this.isTabFixed = (-position.y) > this.tabOffsetTop

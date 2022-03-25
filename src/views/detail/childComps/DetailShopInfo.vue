@@ -1,30 +1,30 @@
 <template>
   <div class="shop-info">
     <div class="shop-top">
-      <img :src="shop.logo">
-      <span class="title">{{shop.name}}</span>
+      <img :src="shopInfo.logo">
+      <span class="title">{{ shopInfo.name }}</span>
     </div>
     <div class="shop-middle">
       <div class="shop-middle-item shop-middle-left">
         <div class="info-sells">
           <div class="sells-count">
-            {{shop.sells | sellCountFilter}}
+            {{ shopInfo.sells | sellCountFilter }}
           </div>
           <div class="sells-text">总销量</div>
         </div>
         <div class="info-goods">
           <div class="goods-count">
-            {{shop.goodsCount}}
+            {{ shopInfo.goodsCount }}
           </div>
           <div class="goods-text">全部宝贝</div>
         </div>
       </div>
       <div class="shop-middle-item shop-middle-right">
         <table>
-          <tr v-for="(item, index) in shop.score" :key="index">
-            <td>{{item.name}}</td>
-            <td class="score" :class="{'score-better': item.isBetter}">{{item.score}}</td>
-            <td class="better" :class="{'better-more': item.isBetter}"><span>{{item.isBetter ? '高':'低'}}</span></td>
+          <tr v-for="(item, index) in shopInfo.score" :key="index">
+            <td>{{ item.name }}</td>
+            <td class="score" :class="{'score-better': item.isBetter}">{{ item.score }}</td>
+            <td class="better" :class="{'better-more': item.isBetter}"><span>{{ item.isBetter ? '高' : '低' }}</span></td>
           </tr>
         </table>
       </div>
@@ -39,10 +39,10 @@
 	export default {
 		name: "DetailShopInfo",
     props: {
-		  shop: {
-		    type: Object,
+      shopInfo: {
+        type: Object,
         default() {
-		      return {}
+          return {}
         }
       }
     },
