@@ -1,12 +1,12 @@
 <template>
-  <div class="detail">
-    <div class="big">
-      <slot name="name"></slot>
-    </div>
-    <div class="small">
-      <slot name="value"></slot>
-    </div>
+<div class="detail">
+  <div class="big">
+    <slot name="name"></slot>
   </div>
+  <div class="small">
+    <slot name="value"></slot>
+  </div>
+</div>
 </template>
 
 <script>

@@ -1,7 +1,7 @@
 <template>
   <scroll id="tab-menu">
     <div class="menu">
-      <div v-for="(item,index) in childcategories"
+      <div v-for="(item,index) in childCategories"
            class="menu-item"
            :key="index"
            :class="{active:index === currentIndex}"
@@ -25,7 +25,7 @@ export default {
     }
   },
   props: {
-    childcategories: {
+    childCategories: {
       type: Array,
       default() {
         return []

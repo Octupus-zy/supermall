@@ -1,19 +1,19 @@
 <template>
-  <div class="user">
-    <a href="">
-      <slot name="user-icon">
-        <img src="@/assets/img/common/user.png" alt="" class="privateImage-svg">
-      </slot>
-    </a>
-    <div class="aaa">
-      <slot>
-        <div>登录/注册</div>
-      </slot>
-      <slot>
-        <div class="bbb">暂无绑定手机号</div>
-      </slot>
-    </div>
+<div class="user">
+  <a href="">
+    <slot name="user-icon">
+      <img src="@/assets/img/common/user.png" alt="" class="privateImage-svg">
+    </slot>
+  </a>
+  <div class="aaa">
+    <slot>
+      <div>登录/注册</div>
+    </slot>
+    <slot>
+      <div class="bbb">暂无绑定手机号</div>
+    </slot>
   </div>
+</div>
 </template>
 
 <script>

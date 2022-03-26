@@ -41,11 +41,9 @@ export default {
 .item img {
   width: 80%;
 }
-
 .item text {
   margin-top: 15px;
 }
-
 /*.item img{*/
 /*width: 100%;*/
 /*  height: 100%;*/

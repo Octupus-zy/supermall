@@ -69,9 +69,9 @@ export default {
     },
     calcuClick() {
       if (!this.isSelectAll && this.cartList.length === 0) {
-        this.$toast.show('购物车为空', 2000)
-      } else if (!this.isSelectAll && this.cartList.length !== 0) {
-        this.$toast.show('未勾选商品', 2000)
+        this.$toast.show('购物车为空', 1500)
+      } else if (this.checkLength === 0) {
+        this.$toast.show('未勾选商品', 1500)
       }
     }
   }

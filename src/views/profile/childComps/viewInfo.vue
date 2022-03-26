@@ -1,8 +1,8 @@
 <template>
-  <div class="view">
-    <slot name="img"></slot>
-    <slot name="news" class="viewinfo"></slot>
-  </div>
+<div class="view">
+  <slot name="img"></slot>
+  <slot name="news" class="viewinfo"></slot>
+</div>
 </template>
 
 <script>
