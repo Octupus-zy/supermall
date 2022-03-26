@@ -13,7 +13,7 @@
       合计: {{ totalPrice }}
     </div>
 
-    <div class="calculate">
+    <div class="calculate" @click="calcuClick">
       去计算({{ checkLength }})
     </div>
 
@@ -47,16 +47,16 @@ export default {
       // return !(this.cartList.filter(item => !item.checked).length)
 
       // 2.使用find
-      // if (this.cartList.length === 0) return false
-      // return !this.cartList.find(item => !item.checked)
+      if (this.cartList.length === 0) return false
+      return !this.cartList.find(item => !item.checked)
 
       // 3.循环遍历
-      for (let item of this.cartList) {
-        if (!item.checked) {
-          return false
-        }
-      }
-      return true
+      // for (let item of this.cartList) {
+      //   if (!item.checked) {
+      //     return false
+      //   }
+      // }
+      // return true
     }
   },
   methods: {
@@ -65,6 +65,13 @@ export default {
         this.cartList.forEach(item => item.checked = false)
       } else { //全部未选或者部分未选
         this.cartList.forEach(item => item.checked = true)
+      }
+    },
+    calcuClick() {
+      if (!this.isSelectAll && this.cartList.length === 0) {
+        this.$toast.show('购物车为空', 2000)
+      } else if (!this.isSelectAll && this.cartList.length !== 0) {
+        this.$toast.show('未勾选商品', 2000)
       }
     }
   }

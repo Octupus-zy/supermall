@@ -26,6 +26,8 @@
     <detail-bottom-bar @addToCart="addToCart"/>
     <!--返回-->
     <back-top @click.native="backTop" v-show="isShowBackTop"/>
+    <!--提示-->
+    <toast :message="message" :show="show"/>
   </div>
 </template>
 
@@ -41,6 +43,7 @@ import DetailBottomBar from "@/views/detail/childComps/DetailBottomBar";
 
 import GoodsList from "@/components/content/goods/GoodsList";
 import Scroll from '@/components/common/scroll/Scroll'
+import Toast from "@/components/common/toast/Toast";
 
 import {getDetail, getRecommend, Goods, GoodsParam, Shop} from "@/network/detail";
 
@@ -48,6 +51,8 @@ import {backTopMixin, itemListenerMixin} from "@/common/mixin";
 import {BACKTOP_DISTANCE} from "@/common/const";
 
 import {debounce} from "@/common/utils";
+import {mapActions} from "vuex";
+
 
 export default {
   name: "Detail",
@@ -62,6 +67,7 @@ export default {
     DetailBottomBar,
     Scroll,
     GoodsList,
+    Toast,
   },
   // 图片加载监听混入函数/backTop事件混入
   mixins: [itemListenerMixin, backTopMixin],
@@ -78,6 +84,8 @@ export default {
       themeTopYs: [],
       getThemeTopY: null,
       currentIndex: 0,
+      message: '',
+      show: false
     }
   },
   created() {
@@ -138,6 +146,9 @@ export default {
     this.$bus.$off('itemImageLoad', this.itemImgListener)
   },
   methods: {
+    // vuex中的映射关系
+    ...mapActions(['addCart']),
+
     imageLoad() {
       this.refresh()
       this.getThemeTopY()
@@ -175,6 +186,7 @@ export default {
       this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 300)
     },
     addToCart() {
+      // 1.获取购物车需要展示的信息
       const product = {};
       product.image = this.topImages[0];
       product.title = this.goodsInfo.title;
@@ -182,8 +194,29 @@ export default {
       product.price = this.goodsInfo.realPrice;
       product.iid = this.iid;
 
+
+      // 2.将商品信息添加到购物车里(1.Promise 2..mapActions)
       // this.$store.commit('addToCart',product)
-      this.$store.dispatch('addToCart', product)
+      // this.$store.dispatch('addToCart', product).then(res => {
+      //   console.log(res);
+      // })
+
+      // 1.普通方法弹窗
+      // this.addCart(product).then(res => {
+      //   console.log(res);
+      //   this.show = true
+      //   this.message = res
+      //   setTimeout(() => {
+      //     this.show = false
+      //     this.message = ''
+      //   },1500)
+      // })
+
+      // 2.toast插件方法
+      this.addCart(product).then(res => {
+        this.$toast.show(res, 2000)
+      })
+
     }
   }
 }

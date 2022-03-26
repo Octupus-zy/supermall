@@ -49,6 +49,7 @@ export default {
       isCount: true,
       adds: false,
       subs: false,
+      // 切换显示数量样式
       shows: false,
     }
   },

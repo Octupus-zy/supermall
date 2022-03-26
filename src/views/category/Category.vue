@@ -132,7 +132,7 @@ export default {
     })
     // 侦测位置
     this.scroll.on('scroll', (position) => {
-      console.log(position);
+      // console.log(position);
     })
     // 上拉加载更多
     this.scroll.on('pullingUp', () => {
@@ -152,9 +152,9 @@ export default {
 
 <style scoped>
 .wrapper {
-  height: 150px;
-  background-color: red;
-
+  height: 100vh;
+  background-color: #eee;
+  width: 30%;
   overflow: hidden;
   /*overflow-y: scroll;*/
 }
